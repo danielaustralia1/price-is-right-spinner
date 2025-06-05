@@ -19,7 +19,7 @@ describe('getRandomEmployee', () => {
       ])
       .execute();
 
-    const result = await getRandomEmployee();
+    const result = await getRandomEmployee(db);
 
     // Verify the result structure
     expect(result.id).toBeDefined();
@@ -48,11 +48,11 @@ describe('getRandomEmployee', () => {
 
     // Get multiple random employees
     const results = await Promise.all([
-      getRandomEmployee(),
-      getRandomEmployee(),
-      getRandomEmployee(),
-      getRandomEmployee(),
-      getRandomEmployee()
+      getRandomEmployee(db),
+      getRandomEmployee(db),
+      getRandomEmployee(db),
+      getRandomEmployee(db),
+      getRandomEmployee(db)
     ]);
 
     // Verify we got valid employees
@@ -77,7 +77,7 @@ describe('getRandomEmployee', () => {
 
     const employee = insertResult[0];
 
-    const result = await getRandomEmployee();
+    const result = await getRandomEmployee(db);
 
     // Since there's only one employee, we should get this one
     expect(result.id).toBe(employee.id);
@@ -87,7 +87,7 @@ describe('getRandomEmployee', () => {
 
   it('should throw error when no employees exist', async () => {
     // Database is empty, so this should throw
-    await expect(getRandomEmployee()).rejects.toThrow(/no employees found/i);
+    await expect(getRandomEmployee(db)).rejects.toThrow(/no employees found/i);
   });
 
   it('should handle employee with zero wins', async () => {
@@ -96,7 +96,7 @@ describe('getRandomEmployee', () => {
       .values({ name: 'New Employee', wins: 0 })
       .execute();
 
-    const result = await getRandomEmployee();
+    const result = await getRandomEmployee(db);
 
     expect(result.name).toBe('New Employee');
     expect(result.wins).toBe(0);
@@ -108,7 +108,7 @@ describe('getRandomEmployee', () => {
       .values({ name: 'Complete Employee', wins: 10 })
       .execute();
 
-    const result = await getRandomEmployee();
+    const result = await getRandomEmployee(db);
 
     // Verify all required schema fields are present
     expect(result).toHaveProperty('id');

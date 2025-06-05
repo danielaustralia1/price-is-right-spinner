@@ -1,12 +1,93 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { trpc } from '@/utils/trpc';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Trophy, Star, Users, Award } from 'lucide-react';
+import { Trophy, Star, Users, Award, Settings, AlertTriangle } from 'lucide-react';
 import type { Employee, LeaderboardEntry } from '../../server/src/schema';
+
+// Configuration form component
+function ConfigurationForm({ onConfigSubmit, configError }: { 
+  onConfigSubmit: (url: string, key: string) => void;
+  configError: string;
+}) {
+  const [supabaseUrl, setSupabaseUrl] = useState('');
+  const [supabaseKey, setSupabaseKey] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onConfigSubmit(supabaseUrl, supabaseKey);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md bg-white/10 backdrop-blur-sm border-white/20">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold text-white flex items-center justify-center space-x-2">
+            <Settings className="w-6 h-6" />
+            <span>🔧 Supabase Configuration</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {configError && (
+            <div className="mb-4 p-3 bg-red-500/20 border border-red-400 rounded-lg flex items-center space-x-2">
+              <AlertTriangle className="w-5 h-5 text-red-300" />
+              <span className="text-red-200 text-sm">{configError}</span>
+            </div>
+          )}
+          
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-white text-sm font-medium mb-2">
+                Supabase Project URL
+              </label>
+              <Input
+                type="url"
+                placeholder="https://your-project.supabase.co"
+                value={supabaseUrl}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSupabaseUrl(e.target.value)}
+                required
+                className="bg-white/20 border-white/30 text-white placeholder-white/60"
+              />
+            </div>
+            <div>
+              <label className="block text-white text-sm font-medium mb-2">
+                Supabase Anon Key
+              </label>
+              <Input
+                type="password"
+                placeholder="Your anon key..."
+                value={supabaseKey}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSupabaseKey(e.target.value)}
+                required
+                className="bg-white/20 border-white/30 text-white placeholder-white/60"
+              />
+            </div>
+            <Button 
+              type="submit" 
+              className="w-full bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white font-bold"
+            >
+              💾 Save Configuration
+            </Button>
+          </form>
+          
+          <div className="mt-6 p-4 bg-yellow-500/20 border border-yellow-400 rounded-lg">
+            <p className="text-yellow-200 text-xs">
+              ⚠️ <strong>Important:</strong> For this demo to work, you need to manually modify the tRPC client to send Supabase credentials as headers. 
+              The configuration will be stored locally but won't be sent automatically due to the protected tRPC utility file.
+            </p>
+          </div>
+          
+          <p className="text-white/80 text-xs mt-4 text-center">
+            Your credentials will be stored locally in your browser.
+          </p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
 
 // Spinner wheel component
 function SpinnerWheel({ employees, onSpin, isSpinning }: {
@@ -161,11 +242,30 @@ function App() {
   const [winner, setWinner] = useState<Employee | null>(null);
   const [showCongrats, setShowCongrats] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Configuration state
+  const [supabaseUrl, setSupabaseUrl] = useState<string>('');
+  const [supabaseKey, setSupabaseKey] = useState<string>('');
+  const [configError, setConfigError] = useState<string>('');
+
+  // Load configuration from localStorage on mount
+  useEffect(() => {
+    const storedUrl = localStorage.getItem('SUPABASE_URL');
+    const storedKey = localStorage.getItem('SUPABASE_KEY');
+    
+    if (storedUrl) setSupabaseUrl(storedUrl);
+    if (storedKey) setSupabaseKey(storedKey);
+    
+    setIsLoading(false);
+  }, []);
 
   // Load initial data
   const loadData = useCallback(async () => {
+    if (!supabaseUrl || !supabaseKey) return;
+    
     try {
       setIsLoading(true);
+      setConfigError('');
       const [employeesData, leaderboardData] = await Promise.all([
         trpc.getEmployees.query(),
         trpc.getLeaderboard.query()
@@ -174,18 +274,23 @@ function App() {
       setLeaderboard(leaderboardData);
     } catch (error) {
       console.error('Failed to load data:', error);
+      setConfigError('Failed to connect to Supabase. Please check your credentials and ensure the tRPC client is configured to send headers.');
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [supabaseUrl, supabaseKey]);
 
-  // Initial load
+  // Initial load when configuration is available
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    if (supabaseUrl && supabaseKey) {
+      loadData();
+    }
+  }, [loadData, supabaseUrl, supabaseKey]);
 
   // Daily data re-fetching with periodic interval
   useEffect(() => {
+    if (!supabaseUrl || !supabaseKey) return;
+
     // Set interval to 5 seconds for testing (would be 24 * 60 * 60 * 1000 for 24 hours in production)
     const interval = setInterval(() => {
       console.log('Refreshing data periodically...');
@@ -196,13 +301,14 @@ function App() {
     return () => {
       clearInterval(interval);
     };
-  }, [loadData]);
+  }, [loadData, supabaseUrl, supabaseKey]);
 
   const handleSpin = useCallback(async (selectedEmployee: Employee) => {
     setIsSpinning(true);
     setWinner(selectedEmployee);
     
     try {
+      setConfigError('');
       // Increment wins for the selected employee
       await trpc.incrementEmployeeWins.mutate({ employeeId: selectedEmployee.id });
       
@@ -214,6 +320,7 @@ function App() {
       setShowCongrats(true);
     } catch (error) {
       console.error('Failed to update wins:', error);
+      setConfigError('Failed to update wins. Please check your credentials and ensure the tRPC client is configured to send headers.');
     } finally {
       setIsSpinning(false);
     }
@@ -223,6 +330,22 @@ function App() {
     setShowCongrats(false);
     setWinner(null);
   }, []);
+
+  const handleConfigSubmit = useCallback((url: string, key: string) => {
+    // Save to localStorage
+    localStorage.setItem('SUPABASE_URL', url);
+    localStorage.setItem('SUPABASE_KEY', key);
+    
+    // Update state
+    setSupabaseUrl(url);
+    setSupabaseKey(key);
+    setConfigError('');
+  }, []);
+
+  // Show configuration form if credentials are missing or there's a config error
+  if (!supabaseUrl || !supabaseKey || configError) {
+    return <ConfigurationForm onConfigSubmit={handleConfigSubmit} configError={configError} />;
+  }
 
   if (isLoading) {
     return (
@@ -248,6 +371,22 @@ function App() {
             <span>Spin to win! May the odds be in your favor!</span>
             <Users className="w-5 h-5" />
           </p>
+          
+          {/* Configuration reset button */}
+          <Button
+            onClick={() => {
+              localStorage.removeItem('SUPABASE_URL');
+              localStorage.removeItem('SUPABASE_KEY');
+              setSupabaseUrl('');
+              setSupabaseKey('');
+            }}
+            variant="outline"
+            size="sm"
+            className="mt-2 bg-white/20 text-white border-white/30 hover:bg-white/30"
+          >
+            <Settings className="w-4 h-4 mr-2" />
+            Reset Configuration
+          </Button>
         </div>
 
         <div className="flex flex-col lg:flex-row items-start justify-center gap-8">

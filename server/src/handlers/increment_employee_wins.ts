@@ -1,13 +1,12 @@
-
 import { db } from '../db';
 import { employeesTable } from '../db/schema';
 import { type IncrementWinsInput, type Employee } from '../schema';
 import { eq } from 'drizzle-orm';
 
-export const incrementEmployeeWins = async (input: IncrementWinsInput): Promise<Employee> => {
+export const incrementEmployeeWins = async (dbInstance = db, input: IncrementWinsInput): Promise<Employee> => {
   try {
     // First, check if the employee exists
-    const existingEmployee = await db.select()
+    const existingEmployee = await dbInstance.select()
       .from(employeesTable)
       .where(eq(employeesTable.id, input.employeeId))
       .execute();
@@ -17,7 +16,7 @@ export const incrementEmployeeWins = async (input: IncrementWinsInput): Promise<
     }
 
     // Increment the wins count
-    const result = await db.update(employeesTable)
+    const result = await dbInstance.update(employeesTable)
       .set({
         wins: existingEmployee[0].wins + 1
       })

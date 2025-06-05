@@ -1,12 +1,11 @@
-
 import { db } from '../db';
 import { employeesTable } from '../db/schema';
 import { type Employee } from '../schema';
 import { desc } from 'drizzle-orm';
 
-export const getEmployees = async (): Promise<Employee[]> => {
+export const getEmployees = async (dbInstance = db): Promise<Employee[]> => {
   try {
-    const results = await db.select()
+    const results = await dbInstance.select()
       .from(employeesTable)
       .orderBy(desc(employeesTable.wins))
       .execute();

@@ -1,13 +1,12 @@
-
 import { db } from '../db';
 import { employeesTable } from '../db/schema';
 import { sql } from 'drizzle-orm';
 import { type Employee } from '../schema';
 
-export const getRandomEmployee = async (): Promise<Employee> => {
+export const getRandomEmployee = async (dbInstance = db): Promise<Employee> => {
   try {
     // Use PostgreSQL's RANDOM() function to get a random employee
-    const result = await db.select()
+    const result = await dbInstance.select()
       .from(employeesTable)
       .orderBy(sql`RANDOM()`)
       .limit(1)

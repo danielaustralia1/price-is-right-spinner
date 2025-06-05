@@ -26,7 +26,7 @@ describe('incrementEmployeeWins', () => {
     };
 
     // Increment wins
-    const result = await incrementEmployeeWins(testInput);
+    const result = await incrementEmployeeWins(db, testInput);
 
     // Verify the result
     expect(result.id).toEqual(employee[0].id);
@@ -49,7 +49,7 @@ describe('incrementEmployeeWins', () => {
     };
 
     // Increment wins
-    const result = await incrementEmployeeWins(testInput);
+    const result = await incrementEmployeeWins(db, testInput);
 
     // Verify the result
     expect(result.id).toEqual(employee[0].id);
@@ -72,7 +72,7 @@ describe('incrementEmployeeWins', () => {
     };
 
     // Increment wins
-    await incrementEmployeeWins(testInput);
+    await incrementEmployeeWins(db, testInput);
 
     // Query database to verify the change was persisted
     const updatedEmployee = await db.select()
@@ -91,7 +91,7 @@ describe('incrementEmployeeWins', () => {
     };
 
     // Should throw error for non-existent employee
-    await expect(incrementEmployeeWins(testInput))
+    await expect(incrementEmployeeWins(db, testInput))
       .rejects
       .toThrow(/Employee with ID .* not found/i);
   });
@@ -111,13 +111,13 @@ describe('incrementEmployeeWins', () => {
     };
 
     // Increment wins multiple times
-    let result = await incrementEmployeeWins(testInput);
+    let result = await incrementEmployeeWins(db, testInput);
     expect(result.wins).toEqual(11);
 
-    result = await incrementEmployeeWins(testInput);
+    result = await incrementEmployeeWins(db, testInput);
     expect(result.wins).toEqual(12);
 
-    result = await incrementEmployeeWins(testInput);
+    result = await incrementEmployeeWins(db, testInput);
     expect(result.wins).toEqual(13);
 
     // Verify final state in database
