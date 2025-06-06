@@ -4,12 +4,20 @@ import 'dotenv/config';
 import cors from 'cors';
 import superjson from 'superjson';
 
-import { incrementWinsInputSchema } from './schema';
+import { 
+  incrementWinsInputSchema, 
+  createEmployeeInputSchema, 
+  updateEmployeeInputSchema, 
+  deleteEmployeeInputSchema 
+} from './schema';
 import { getEmployees } from './handlers/get_employees';
 import { getLeaderboard } from './handlers/get_leaderboard';
 import { incrementEmployeeWins } from './handlers/increment_employee_wins';
 import { getRandomEmployee } from './handlers/get_random_employee';
 import { seedDatabase } from './handlers/seed_database';
+import { createEmployee } from './handlers/create_employee';
+import { updateEmployee } from './handlers/update_employee';
+import { deleteEmployee } from './handlers/delete_employee';
 
 const t = initTRPC.create({
   transformer: superjson,
@@ -32,6 +40,21 @@ const appRouter = router({
     .input(incrementWinsInputSchema)
     .mutation(async ({ input }) => {
       return incrementEmployeeWins(input);
+    }),
+  createEmployee: publicProcedure
+    .input(createEmployeeInputSchema)
+    .mutation(async ({ input }) => {
+      return createEmployee(input);
+    }),
+  updateEmployee: publicProcedure
+    .input(updateEmployeeInputSchema)
+    .mutation(async ({ input }) => {
+      return updateEmployee(input);
+    }),
+  deleteEmployee: publicProcedure
+    .input(deleteEmployeeInputSchema)
+    .mutation(async ({ input }) => {
+      return deleteEmployee(input);
     }),
 });
 

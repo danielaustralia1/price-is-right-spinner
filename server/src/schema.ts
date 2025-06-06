@@ -24,3 +24,25 @@ export const leaderboardEntrySchema = z.object({
 });
 
 export type LeaderboardEntry = z.infer<typeof leaderboardEntrySchema>;
+
+// CRUD input schemas
+export const createEmployeeInputSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  wins: z.number().int().nonnegative().default(0),
+});
+
+export type CreateEmployeeInput = z.infer<typeof createEmployeeInputSchema>;
+
+export const updateEmployeeInputSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(1, 'Name is required'),
+  wins: z.number().int().nonnegative(),
+});
+
+export type UpdateEmployeeInput = z.infer<typeof updateEmployeeInputSchema>;
+
+export const deleteEmployeeInputSchema = z.object({
+  id: z.string().uuid(),
+});
+
+export type DeleteEmployeeInput = z.infer<typeof deleteEmployeeInputSchema>;

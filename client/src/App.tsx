@@ -4,7 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Trophy, Star, Users, Award } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Trophy, Star, Users, Award, Settings } from 'lucide-react';
+import { EmployeeManager } from '@/components/EmployeeManager';
 import type { Employee, LeaderboardEntry } from '../../server/src/schema';
 
 // Spinner wheel component
@@ -62,7 +64,7 @@ function SpinnerWheel({ employees, onSpin, isSpinning }: {
                   width: '140px',
                   height: '20px',
                   transformOrigin: '0 0',
-                  transform: `rotate(${segmentRotation}deg) translate(60px, -10px) rotate(${-segmentRotation}deg)`,
+                  transform: `rotate(${segmentRotation}deg) translate(60px, -10px)`,
                   textShadow: '1px 1px 2px rgba(0,0,0,0.8)'
                 }}
               >
@@ -159,6 +161,7 @@ function App() {
   const [isSpinning, setIsSpinning] = useState(false);
   const [winner, setWinner] = useState<Employee | null>(null);
   const [showCongrats, setShowCongrats] = useState(false);
+  const [showEmployeeManager, setShowEmployeeManager] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   // Load initial data
@@ -244,9 +247,32 @@ function App() {
       <div className="container mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-5xl font-bold text-white mb-2 drop-shadow-lg">
-            🎪 THE PRICE IS RIGHT WHEEL 🎪
-          </h1>
+          <div className="flex items-center justify-center mb-4">
+            <h1 className="text-5xl font-bold text-white mb-2 drop-shadow-lg">
+              🎪 THE PRICE IS RIGHT WHEEL 🎪
+            </h1>
+            <Dialog open={showEmployeeManager} onOpenChange={setShowEmployeeManager}>
+              <DialogTrigger asChild>
+                <Button 
+                  variant="secondary" 
+                  size="sm" 
+                  className="ml-4 bg-white/20 hover:bg-white/30 text-white border-white/30"
+                >
+                  <Settings className="w-4 h-4 mr-2" />
+                  Manage Employees
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Employee Management</DialogTitle>
+                  <DialogDescription>
+                    Add, edit, or remove employees from the spinner wheel.
+                  </DialogDescription>
+                </DialogHeader>
+                <EmployeeManager onEmployeeChange={loadData} />
+              </DialogContent>
+            </Dialog>
+          </div>
           <p className="text-xl text-white/90 flex items-center justify-center space-x-2">
             <Users className="w-5 h-5" />
             <span>Spin to win! May the odds be in your favor!</span>
