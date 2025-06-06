@@ -3,9 +3,9 @@ import { employeesTable } from '../db/schema';
 import { type Employee } from '../schema';
 import { desc } from 'drizzle-orm';
 
-export const getEmployees = async (dbInstance = db): Promise<Employee[]> => {
+export const getEmployees = async (): Promise<Employee[]> => {
   try {
-    const results = await dbInstance.select()
+    const results = await db.select()
       .from(employeesTable)
       .orderBy(desc(employeesTable.wins))
       .execute();

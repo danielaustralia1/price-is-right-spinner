@@ -10,7 +10,7 @@ describe('getLeaderboard', () => {
   afterEach(resetDB);
 
   it('should return empty array when no employees exist', async () => {
-    const result = await getLeaderboard(db);
+    const result = await getLeaderboard();
     expect(result).toEqual([]);
   });
 
@@ -23,7 +23,7 @@ describe('getLeaderboard', () => {
       })
       .execute();
 
-    const result = await getLeaderboard(db);
+    const result = await getLeaderboard();
 
     expect(result).toHaveLength(1);
     expect(result[0].name).toEqual('John Doe');
@@ -42,7 +42,7 @@ describe('getLeaderboard', () => {
       ])
       .execute();
 
-    const result = await getLeaderboard(db);
+    const result = await getLeaderboard();
 
     expect(result).toHaveLength(4);
     
@@ -70,7 +70,7 @@ describe('getLeaderboard', () => {
       ])
       .execute();
 
-    const result = await getLeaderboard(db);
+    const result = await getLeaderboard();
 
     expect(result).toHaveLength(3);
     
@@ -97,7 +97,7 @@ describe('getLeaderboard', () => {
       ])
       .execute();
 
-    const result = await getLeaderboard(db);
+    const result = await getLeaderboard();
 
     expect(result).toHaveLength(3);
     
@@ -118,7 +118,7 @@ describe('getLeaderboard', () => {
       })
       .execute();
 
-    const result = await getLeaderboard(db);
+    const result = await getLeaderboard();
 
     expect(result).toHaveLength(1);
     const employee = result[0];

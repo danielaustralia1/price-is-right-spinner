@@ -12,7 +12,7 @@ describe('getEmployees', () => {
   afterEach(resetDB);
 
   it('should return empty array when no employees exist', async () => {
-    const result = await getEmployees(db);
+    const result = await getEmployees();
     
     expect(result).toEqual([]);
   });
@@ -27,7 +27,7 @@ describe('getEmployees', () => {
       ])
       .execute();
 
-    const result = await getEmployees(db);
+    const result = await getEmployees();
 
     expect(result).toHaveLength(3);
     expect(result.map(e => e.name)).toContain('Alice Johnson');
@@ -45,7 +45,7 @@ describe('getEmployees', () => {
       ])
       .execute();
 
-    const result = await getEmployees(db);
+    const result = await getEmployees();
 
     expect(result).toHaveLength(3);
     expect(result[0].name).toEqual('High Wins');
@@ -66,7 +66,7 @@ describe('getEmployees', () => {
       ])
       .execute();
 
-    const result = await getEmployees(db);
+    const result = await getEmployees();
 
     expect(result).toHaveLength(3);
     // First two should have 5 wins, last should have 3
@@ -81,7 +81,7 @@ describe('getEmployees', () => {
       .values({ name: 'Test Employee', wins: 15 })
       .execute();
 
-    const result = await getEmployees(db);
+    const result = await getEmployees();
 
     expect(result).toHaveLength(1);
     expect(typeof result[0].id).toEqual('string');
@@ -98,7 +98,7 @@ describe('getEmployees', () => {
       ])
       .execute();
 
-    const result = await getEmployees(db);
+    const result = await getEmployees();
 
     expect(result).toHaveLength(2);
     expect(result[0].name).toEqual('Veteran Employee');
